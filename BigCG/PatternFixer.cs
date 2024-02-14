@@ -7,7 +7,19 @@ namespace BigCG;
 
 public static class PatternFixer
 {
-    public static string[] FixPatterns(string[] pattern)
+    public static void FixPattern(ArenaPattern pattern)
+    {
+        if (pattern == null)
+        {
+            Debug.LogWarning("Pattern is null,,, guh?");
+            return;
+        }
+
+        pattern.heights = string.Join("\n", FixPatternHeights(pattern.heights.Split('\n').ToList()));
+        pattern.prefabs = string.Join("\n", FixPatternEnemies(pattern.prefabs.Split('\n').ToList()));
+    }
+
+    public static string[] FixStringPattern(string[] pattern)
     {
         List<string> result = new();
         List<string> environment = new();
@@ -28,12 +40,6 @@ public static class PatternFixer
         result.AddRange(FixPatternHeights(environment));
         result.Add(string.Empty);
         result.AddRange(FixPatternEnemies(enemies));
-
-        Debug.Log($"Pattern ({result.Count} lines)");
-        foreach (string line in result)
-        {
-            Debug.Log($"    {line} ({line.Length})");
-        }
 
         return result.ToArray();
     }

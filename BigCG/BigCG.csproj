@@ -31,6 +31,9 @@
     <Reference Include="UnityEngine">
       <HintPath>..\Libraries\Managed\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>..\Libraries\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\Libraries\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
