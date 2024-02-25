@@ -174,7 +174,7 @@ public static class PatternFixer
                             isNegative = true;
                             continue;
                         }
-                        rowList.Add(int.Parse(character.ToString()));
+                        rowList.Add(int.Parse(character.ToString()) * (isNegative ? -1 : 1));
                         hasAdded = true;
                     }
                     else

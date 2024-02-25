@@ -34,10 +34,12 @@ public class Plugin : BaseUnityPlugin
     private static Harmony s_harmony = new(Guid);
     private static FieldInfo s_gridSize = AccessTools.Field(typeof(Plugin), nameof(GridSize));
     private static MethodInfo s_mainGridSize = AccessTools.Method(typeof(Plugin), "get_MainGridSize");
-    private static MethodInfo s_fixPattern = AccessTools.Method(typeof(PatternFixer), nameof(PatternFixer.FixPattern));
+    private static MethodInfo s_getFiles = AccessTools.Method(typeof(Directory), nameof(Directory.GetFiles), [typeof(string), typeof(string), typeof(SearchOption)]);
+    private static MethodInfo s_getFilesReplacement = AccessTools.Method(typeof(Plugin), nameof(GetFilesReplacement));
     private static MethodInfo s_fixStringPattern = AccessTools.Method(typeof(PatternFixer), nameof(PatternFixer.FixStringPattern));
     private static MethodInfo s_readAllLines = AccessTools.Method(typeof(File), nameof(File.ReadAllLines), [typeof(string)]);
 
+    private static string[] s_extensions = [".cgp", ".cgpe"];
     private static List<GameObject> s_mergedMeshes = new();
     private static AssetBundle s_modBundle;
     private static Mesh s_optimizedCube;
@@ -337,4 +339,28 @@ public class Plugin : BaseUnityPlugin
         __instance.PrimaryMeshFilter.mesh = s_optimizedStairs;
         __instance.SecondaryMeshFilter.mesh = s_optimizedStairs;
     }
+
+    [HarmonyPatch(typeof(CustomPatterns), nameof(CustomPatterns.BuildButtons)), HarmonyTranspiler]
+    private static IEnumerable<CodeInstruction> AddCgpeFiles(IEnumerable<CodeInstruction> instructions)
+    {
+        foreach (CodeInstruction instruction in instructions)
+        {
+            if (instruction.opcode == OpCodes.Call && instruction.OperandIs(s_getFiles))
+            {
+                instruction.operand = s_getFilesReplacement;
+            }
+
+            yield return instruction;
+        }
+    }
+
+    [HarmonyPatch(typeof(CustomPatterns), nameof(CustomPatterns.OpenEditor)), HarmonyPrefix]
+    private static bool OpenCustomEditor()
+    {
+        Application.OpenURL("https://wafflethings.github.io/CGPEditor/");
+        return false;
+    }
+
+    private static string[] GetFilesReplacement(string path, string filter, SearchOption option) => new DirectoryInfo(path).EnumerateFiles()
+        .Where(f => s_extensions.Contains(f.Extension.ToLower())).Select(f => f.ToString()).ToArray();
 }
